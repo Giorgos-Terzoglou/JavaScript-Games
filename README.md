@@ -3,13 +3,13 @@
 # BeachVolleyball
 
 Left player movement 
-a <-
-w jump
+a <- ,
+w jump ,
 d ->
 
 Right player movement
-left arrow <-
-up arrow jump
+left arrow <- ,
+up arrow jump ,
 right arrow ->
 
 escape pause
