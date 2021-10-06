@@ -34,4 +34,18 @@ escape - pause
 
 https://giorgos-terzoglou.github.io/JavaScript-Games/cars/HtmlPage.html
 
+# Ping Pong
 
+Left player movement  
+w - move up ,
+s - move down
+b - shoot
+
+Right player movement   
+up arrow - move up ,
+down arrow - move down ,
+p - shoot
+
+escape - pause
+
+https://giorgos-terzoglou.github.io/JavaScript-Games/ping%20poing/HtmlPage.html
