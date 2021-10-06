@@ -54,3 +54,4 @@ https://giorgos-terzoglou.github.io/JavaScript-Games/ping%20poing/HtmlPage.html
 
 The ricochet robots board game
 
+https://giorgos-terzoglou.github.io/JavaScript-Games/ricochet/HtmlPage.html
