@@ -1,0 +1,412 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            text-align:center;
+        }
+        .row{
+            margin-top:10px;
+
+        }
+        canvas{
+            float:left;
+            
+            border:1px solid black;
+        }
+        .right {
+            padding-top: 20%;
+            font: 200% Georgia;
+        }
+        
+    </style>
+    <title>ricochet robots</title>
+</head>
+    
+<body>
+    <div id="Page1"> 
+        <div class="row" style="margin-top:10%;">
+            <span>RED</span>: X
+            <span><input type="number" id="redX" min="1"max="16"/></span> Y 
+            <span><input type="number" id="redY" min="1" max="16" /></span>
+                    
+        </div>
+        <div class="row" >
+            <span>GREEN</span>: X
+            <span><input type="number" id="greenX" min="1" max="16" /></span> Y
+            <span><input type="number" id="greenY" min="1" max="16" /></span>
+
+        </div>
+        <div class="row" >
+            <span>YELLOW</span>: X
+            <span><input type="number" id="yellowX" min="1" max="16" /></span> Y
+            <span><input type="number" id="yellowY" min="1" max="16" /></span>
+
+        </div>
+        <div class="row" >
+            <span>BLUE</span>: X
+            <span><input type="number" id="blueX" min="1" max="16" /></span> Y
+            <span><input type="number" id="blueY" min="1" max="16" /></span>
+
+        </div>
+
+        <div class="row">
+            <button onclick="choosePage(this); takeStartingPositions();" id="showPage2">READY</button>
+        </div>
+    </div>
+    
+    <div id="Page2"style="display:none">
+        <canvas id="gameScreen" width="1200" height="900" onclick="takeCoords(event)"></canvas>
+        <div class="right">
+            <span>CHOSEN ROBOT :</span>
+            <span id="movingRobot_div"> RED</span>
+            <div><span>COUNT : </span><span id="count_span">0</span></div>
+        </div>
+    </div>
+
+
+    <script>
+        //------------------------------------FOR CHANGING PAGES------------------------------
+        var page1 = document.getElementById("Page1");
+        var page2 = document.getElementById("Page2");
+        
+        function choosePage(el) {
+            page1.style.top = 200 + "%";
+            page1.style.display = "none";
+            page2.style.top = 200 + "%";
+            page2.style.display = "none";
+            
+            if (el.id === "showPage2") {
+                page2.style.top = 0 + "%";
+                page2.style.display = "block";
+            }
+        }
+        //------------------------------------FOR Drawing the board------------------------------
+        var canvas = document.getElementById("gameScreen");
+        var ctx = canvas.getContext("2d");
+        
+       
+
+        
+        //------------------------------------FOR drawing the starting points------------------------------
+        var tileWidth = canvas.width / 16;
+        var tileHeight = canvas.height / 16;
+
+        //--------------------------------------------componets class------------
+        function componets(x, y, width, height, color) {
+            this.startPosition = {
+                x: x,
+                y: y
+            }
+            this.position = {
+                x: x,
+                y: y
+            };
+            this.size = {
+                width: width,
+                height: height
+            };
+            this.speed = {
+                x: 0,
+                y: 0
+            }
+            this.maxSpeed = {
+                x: 10,
+                y: 10
+            };
+            this.color = color;
+            this.moving = false;
+            this.draw = function () {
+                ctx.fillStyle = color;
+                ctx.fillRect(this.position.x, this.position.y, this.size.width, this.size.height);
+            };
+            this.update = function () {
+                this.position.x += this.speed.x;
+                this.position.y += this.speed.y;
+                if (this.position.x < 0) { this.position.x = 0; this.speed.x = 0; }
+                if (this.position.x > canvas.width - this.size.width) { this.position.x = canvas.width - this.size.width; this.speed.x = 0; }
+                if (this.position.y < 0) { this.position.y = 0; this.speed.y = 0; }
+                if (this.position.y > canvas.height - this.size.height) { this.position.y = canvas.height - this.size.height; this.speed.y = 0; }
+                if (this.speed.x!=0||this.speed.y!=0){this.moving=true}else{this.moving=false}
+            }
+            this.crashWith = function (otherObject) {
+                var myLeft = this.position.x;
+                var myRight = this.position.x + this.size.width;
+                var myTop = this.position.y;
+                var myBottom = this.position.y + this.size.height;
+
+                var otherLeft = otherObject.position.x;
+                var otherRight = otherObject.position.x + otherObject.size.width;
+                var otherTop = otherObject.position.y;
+                var otherBottom = otherObject.position.y + otherObject.size.height;
+
+                var crash = false;
+                if ((myBottom + 10 > otherTop) &&
+                    (myTop - 10 < otherBottom) &&
+                    (myRight + 10 > otherLeft) &&
+                    (myLeft - 10 < otherRight)) {
+                    crash = true;
+                }
+                return crash;
+            }
+            //move functions on X direction
+            this.moveRight = function () {
+                this.speed.x = +this.maxSpeed.x;
+            }
+            this.moveLeft = function () {
+                this.speed.x = -this.maxSpeed.x;
+            }
+            //move on y direction
+            this.moveUp = function () {
+                this.speed.y = -this.maxSpeed.y;
+            }
+            this.moveDown = function () {
+                this.speed.y = +this.maxSpeed.y;
+            }
+            //stop functions
+            this.stop = function () {
+                this.speed.x = 0;
+                this.speed.y = 0;
+            }
+            this.reset = function () {
+                this.position.x = this.startPosition.x;
+                this.position.y = this.startPosition.y;
+            }
+        }
+
+        function takeStartingPositions() {
+            redX = document.getElementById("redX").value;
+            redY = document.getElementById("redY").value;
+            blueX = document.getElementById("blueX").value;
+            blueY = document.getElementById("blueY").value;
+            greenX = document.getElementById("greenX").value;
+            greenY = document.getElementById("greenY").value;
+            yellowX = document.getElementById("yellowX").value;
+            yellowY = document.getElementById("yellowY").value;
+            
+            
+            
+            redPlayer = new componets((redX - 1) * tileWidth + 0.1*tileWidth, (redY - 1) * tileHeight + 0.1 *tileHeight, tileWidth*0.8, 0.8*tileHeight, "red");
+            redPlayer.draw();
+            bluePlayer = new componets((blueX - 1) * tileWidth + 0.1 * tileWidth, (blueY - 1) * tileHeight + 0.1 * tileHeight, tileWidth * 0.8, 0.8 * tileHeight, "blue");
+            bluePlayer.draw();
+            yellowPlayer = new componets((yellowX - 1) * tileWidth + 0.1 * tileWidth, (yellowY - 1) * tileHeight + 0.1 * tileHeight, tileWidth * 0.8, 0.8 * tileHeight, "yellow");
+            yellowPlayer.draw();
+            greenPlayer = new componets((greenX - 1) * tileWidth + 0.1 * tileWidth, (greenY - 1) * tileHeight + 0.1 * tileHeight, tileWidth * 0.8, 0.8 * tileHeight, "green");
+            greenPlayer.draw();
+            GameLoop();
+        }
+
+        
+        var playerMoving = "red";
+        var count = 0;
+
+        function takeCoords(event) {
+            if(event.clientX > yellowPlayer.position.x && 
+                event.clientX < yellowPlayer.position.x + yellowPlayer.size.width &&
+                event.clientY >yellowPlayer.position.y &&
+                event.clientY < yellowPlayer.position.y + yellowPlayer.size.height) {
+                playerMoving = "yellow";
+                document.getElementById("movingRobot_div").innerHTML = "YELLOW";
+            } else if (event.clientX > greenPlayer.position.x &&
+                event.clientX < greenPlayer.position.x + greenPlayer.size.width &&
+                event.clientY > greenPlayer.position.y &&
+                event.clientY < greenPlayer.position.y + greenPlayer.size.height) {
+                playerMoving = "green";
+                document.getElementById("movingRobot_div").innerHTML = "GREEN";
+            } else if (event.clientX > bluePlayer.position.x &&
+                event.clientX < bluePlayer.position.x + bluePlayer.size.width &&
+                event.clientY > bluePlayer.position.y &&
+                event.clientY < bluePlayer.position.y + bluePlayer.size.height) {
+                playerMoving = "blue";
+                document.getElementById("movingRobot_div").innerHTML = "BLUE";
+            } else if (event.clientX > redPlayer.position.x &&
+                event.clientX < redPlayer.position.x + redPlayer.size.width &&
+                event.clientY > redPlayer.position.y &&
+                event.clientY < redPlayer.position.y + redPlayer.size.height) {
+                playerMoving = "red";
+                document.getElementById("movingRobot_div").innerHTML = "RED";
+            }
+        }
+        
+        document.addEventListener("keydown", function event(e) {
+            switch (e.code) {
+                case "ArrowLeft":
+                    if (playerMoving === "red" && redPlayer.moving===false) {
+                        redPlayer.moveLeft();
+                    } else if (playerMoving === "blue") {
+                        bluePlayer.moveLeft();
+                    } else if (playerMoving === "green") {
+                        greenPlayer.moveLeft();
+                    } else if (playerMoving === "yellow") {
+                        yellowPlayer.moveLeft();
+                    }
+                    break;
+                case "ArrowRight":
+                    if (playerMoving === "red" && redPlayer.moving === false) {
+                        redPlayer.moveRight();
+                    } else if (playerMoving === "blue") {
+                        bluePlayer.moveRight();
+                    } else if (playerMoving === "green") {
+                        greenPlayer.moveRight();
+                    } else if (playerMoving === "yellow") {
+                        yellowPlayer.moveRight();
+                    }
+                    break;
+                case "ArrowUp":
+                    if (playerMoving === "red" && redPlayer.moving === false) {
+                        redPlayer.moveUp();
+                    } else if (playerMoving === "blue") {
+                        bluePlayer.moveUp();
+                    } else if (playerMoving === "green") {
+                        greenPlayer.moveUp();
+                    } else if (playerMoving === "yellow") {
+                        yellowPlayer.moveUp();
+                    }
+                    break;
+                case "ArrowDown":
+                    if (playerMoving === "red" && redPlayer.moving === false) {
+                        redPlayer.moveDown();
+                    } else if (playerMoving === "blue") {
+                        bluePlayer.moveDown();
+                    } else if (playerMoving === "green") {
+                        greenPlayer.moveDown();
+                    } else if (playerMoving === "yellow") {
+                        yellowPlayer.moveDown();
+                    }
+                    break;
+            }
+        })
+        //drawing the map
+        var walls = [];
+        
+        function drawWalls() {
+        
+            walls.push(new componets(7 * tileWidth - 3, 7 * tileHeight - 3, tileWidth * 2 + 6,tileHeight*2+ 6, "black"));
+
+        
+            //gia ta gurw gurw
+            walls.push(new componets(0 * tileWidth, 0 * tileHeight - 3, tileWidth * 16, 6, "black"));
+            walls.push(new componets(0 * tileWidth, 16 * tileHeight - 3, tileWidth * 16, 6, "black"));
+            walls.push(new componets(0 * tileWidth - 3, 0 * tileHeight, 6, tileHeight * 16, "black"));
+            walls.push(new componets(16 * tileWidth - 3, 0 * tileHeight, 6, tileHeight * 16, "black"));
+            //gia ta katheta
+            walls.push(new componets(6 * tileWidth - 3, 0 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(10 * tileWidth - 3, 0 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(3 * tileWidth - 3, 2 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(12 * tileWidth - 3, 1 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(5 * tileWidth - 3, 3 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(9 * tileWidth - 3, 3 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(3 * tileWidth - 3, 4 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(15 * tileWidth - 3, 4 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(5 * tileWidth - 3, 5 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(11 * tileWidth - 3, 5 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(4 * tileWidth - 3, 9 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(8 * tileWidth - 3, 10 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(13 * tileWidth - 3, 10 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(1 * tileWidth - 3, 11 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(11 * tileWidth - 3, 11 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(7 * tileWidth - 3, 12 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(14 * tileWidth - 3, 12 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(2 * tileWidth - 3, 14 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(10 * tileWidth - 3, 14 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(6 * tileWidth - 3, 15 * tileHeight, 6, tileHeight, "black"));
+            walls.push(new componets(12 * tileWidth - 3, 15 * tileHeight, 6, tileHeight, "black"));
+            //gia ta orizodia
+            walls.push(new componets(12 * tileWidth, 1 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(3 * tileWidth, 2 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(15 * tileWidth, 2 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(0 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(2 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(5 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(9 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(10 * tileWidth, 5 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(14 * tileWidth, 5 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(4 * tileWidth, 6 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(3 * tileWidth, 9 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(15 * tileWidth, 9 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(8 * tileWidth, 10 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(13 * tileWidth, 10 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(1 * tileWidth, 12 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(10 * tileWidth, 12 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(6 * tileWidth, 13 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(14 * tileWidth, 13 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(0 * tileWidth, 14 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(2 * tileWidth, 14 * tileHeight - 3, tileWidth, 6, "black"));
+            walls.push(new componets(9 * tileWidth, 14 * tileHeight - 3, tileWidth, 6, "black"));
+
+            for (let i = 0; i < walls.length; i++) {
+                walls[i].draw();
+
+            }
+
+            //vazw arithmous
+            ctx.font = "40px Georgia";
+            ctx.fillText("2", 3.35 * tileWidth, 2.7 * tileHeight);
+            ctx.fillText("1", 12.35 * tileWidth, 1.7 * tileHeight);
+            ctx.fillText("3", 5.35 * tileWidth, 3.7 * tileHeight);
+            ctx.fillText("4", 9.35 * tileWidth, 3.7 * tileHeight);
+            ctx.fillText("5", 2.35 * tileWidth, 4.7 * tileHeight);
+            ctx.fillText("6", 14.35 * tileWidth, 4.7 * tileHeight);
+            ctx.fillText("7", 4.35 * tileWidth, 5.7 * tileHeight);
+            ctx.fillText("8", 10.35 * tileWidth, 5.7 * tileHeight);
+            ctx.fillText("9", 3.35 * tileWidth, 9.7 * tileHeight);
+            ctx.fillText("10", 8.2 * tileWidth, 10.7 * tileHeight);
+            ctx.fillText("11", 13.2 * tileWidth, 10.7 * tileHeight);
+            ctx.fillText("12", 1.2 * tileWidth, 11.7 * tileHeight);
+            ctx.fillText("13", 10.2 * tileWidth, 11.7 * tileHeight);
+            ctx.fillText("14", 6.2 * tileWidth, 12.7 * tileHeight);
+            ctx.fillText("15", 14.2 * tileWidth, 12.7 * tileHeight);
+            ctx.fillText("16", 2.2 * tileWidth, 14.7 * tileHeight);
+            ctx.fillText("17", 9.2 * tileWidth, 14.7 * tileHeight);
+
+        }
+
+        //UPDATE FUNCTION
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            redPlayer.update();
+            yellowPlayer.update();
+            greenPlayer.update();
+            bluePlayer.update();
+
+        }
+        //draw function
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawWalls();
+            redPlayer.draw();
+            yellowPlayer.draw();
+            greenPlayer.draw();
+            bluePlayer.draw();
+            for (let i = 0; i < 16; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * canvas.width / 16, 0);
+                ctx.lineTo(i * canvas.width / 16, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 16; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * canvas.height / 16);
+                ctx.lineTo(canvas.width, i * canvas.height / 16);
+                ctx.stroke();
+            }
+        }
+
+        //GAMELOOP FUNCTION
+        var frames = 0;
+        function GameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            update();
+            draw();
+            frames++;
+
+            requestAnimationFrame(GameLoop);
+        }
+        
+    </script>
+</body>
+</html>

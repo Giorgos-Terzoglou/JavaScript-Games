@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            text-align:center;
+        }
+        .row{
+            margin-top:10px;
+
+        }
+        canvas{
+            
+            
+            border:1px solid black;
+        }
+        
+    </style>
+    <title>ricochet robots</title>
+</head>
+    
+<body>
+    <div id="Page1"> 
+        <div class="row" style="margin-top:10%;">
+            <span>RED</span>: X
+            <span><input type="number" id="redX" min="1"max="16"/></span> Y 
+            <span><input type="number" id="redY" min="1" max="16" /></span>
+                    
+        </div>
+        <div class="row" >
+            <span>GREEN</span>: X
+            <span><input type="number" id="greenX" min="1" max="16" /></span> Y
+            <span><input type="number" id="greenY" min="1" max="16" /></span>
+
+        </div>
+        <div class="row" >
+            <span>YELLOW</span>: X
+            <span><input type="number" id="yellowX" min="1" max="16" /></span> Y
+            <span><input type="number" id="yellowY" min="1" max="16" /></span>
+
+        </div>
+        <div class="row" >
+            <span>BLUE</span>: X
+            <span><input type="number" id="blueX" min="1" max="16" /></span> Y
+            <span><input type="number" id="blueY" min="1" max="16" /></span>
+
+        </div>
+
+        <div class="row">
+            <button onclick="choosePage(this); takeStartingPositions();" id="showPage2">READY</button>
+        </div>
+    </div>
+    
+    <div id="Page2"style="display:none">
+        <canvas id="gameScreen" width="1200" height="900"></canvas>
+    </div>
+
+
+    <script>
+        //------------------------------------FOR CHANGING PAGES------------------------------
+        var page1 = document.getElementById("Page1");
+        var page2 = document.getElementById("Page2");
+        
+        function choosePage(el) {
+            page1.style.top = 200 + "%";
+            page1.style.display = "none";
+            page2.style.top = 200 + "%";
+            page2.style.display = "none";
+            
+            if (el.id === "showPage2") {
+                page2.style.top = 0 + "%";
+                page2.style.display = "block";
+            }
+        }
+        //------------------------------------FOR Drawing the board------------------------------
+        var canvas = document.getElementById("gameScreen");
+        var ctx = canvas.getContext("2d");
+        
+        for (let i = 0; i < 16; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * canvas.width / 16, 0);
+            ctx.lineTo(i * canvas.width / 16, canvas.height);
+            ctx.stroke();
+        }
+        for (let i = 0; i < 16; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * canvas.height / 16);
+            ctx.lineTo(canvas.width, i * canvas.height / 16);
+            ctx.stroke();
+        }
+
+        
+        //------------------------------------FOR drawing the starting points------------------------------
+        var tileWidth = canvas.width / 16;
+        var tileHeight = canvas.height / 16;
+        function takeStartingPositions() {
+            redX = document.getElementById("redX").value;
+            redY = document.getElementById("redY").value;
+            blueX = document.getElementById("blueX").value;
+            blueY = document.getElementById("blueY").value;
+            greenX = document.getElementById("greenX").value;
+            greenY = document.getElementById("greenY").value;
+            yellowX = document.getElementById("yellowX").value;
+            yellowY = document.getElementById("yellowY").value;
+            
+            
+            ctx.fillStyle = "red";
+            
+            ctx.fillRect((redX - 1) * tileWidth, (redY-1) * tileHeight, tileWidth, tileHeight);
+            ctx.fillStyle = "blue";
+            ctx.fillRect((blueX - 1) * tileWidth, (blueY -1)* tileHeight, tileWidth, tileHeight);
+            ctx.fillStyle = "green";
+            ctx.fillRect((greenX - 1) * tileWidth, (greenY-1) * tileHeight, tileWidth, tileHeight);
+            ctx.fillStyle = "yellow";
+            ctx.fillRect((yellowX - 1) * tileWidth, (yellowY-1) * tileHeight, tileWidth, tileHeight);
+        }
+
+
+        //--------------------------------------------componets class------------
+        function componets(x, y, width, height, color) {
+            this.startPosition = {
+                x: x,
+                y: y
+            }
+            this.position = {
+                x: x,
+                y: y
+            };
+            this.size = {
+                width: width,
+                height: height
+            };
+            this.color = color;
+            this.draw = function () {
+                ctx.fillStyle = color;
+                ctx.fillRect(this.position.x, this.position.y, this.size.width, this.size.height);
+            };
+        }
+        ctx.fillStyle = "black";
+        ctx.fillRect(7 * tileWidth, 7 * tileHeight, 2 * tileWidth, 2 * tileHeight);
+        var walls = [];
+        //gia ta katheta
+        walls.push(new componets(6 * tileWidth - 3, 0 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(10 * tileWidth - 3, 0 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(3 * tileWidth - 3, 2 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(12 * tileWidth - 3, 1 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(5 * tileWidth - 3, 3 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(9 * tileWidth - 3, 3 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(3 * tileWidth - 3, 4 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(15 * tileWidth - 3, 4 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(5 * tileWidth - 3, 5 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(11 * tileWidth - 3, 5 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(4 * tileWidth - 3, 9 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(8 * tileWidth - 3, 10 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(13 * tileWidth - 3, 10 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(1 * tileWidth - 3, 11 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(11 * tileWidth - 3, 11 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(7 * tileWidth - 3, 12 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(14 * tileWidth - 3, 12 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(2 * tileWidth - 3, 14 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(10 * tileWidth - 3, 14 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(6 * tileWidth - 3, 15 * tileHeight, 6, tileHeight, "black"));
+        walls.push(new componets(12 * tileWidth - 3, 15 * tileHeight, 6, tileHeight, "black"));
+        //gia ta orizodia
+        walls.push(new componets(12 * tileWidth, 1 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(3 * tileWidth, 2 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(15 * tileWidth, 2 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(0 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(2 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(5 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(9 * tileWidth, 4 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(10 * tileWidth, 5 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(14 * tileWidth, 5 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(4 * tileWidth, 6 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(3 * tileWidth, 9 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(15 * tileWidth, 9 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(8 * tileWidth, 10 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(13 * tileWidth, 10 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(1 * tileWidth, 12 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(10 * tileWidth, 12 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(6 * tileWidth, 13 * tileHeight - 3, tileWidth, 6, "black"));
+
+        walls.push(new componets(14 * tileWidth, 13 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(0 * tileWidth, 14 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(2 * tileWidth, 14 * tileHeight - 3, tileWidth, 6, "black"));
+        walls.push(new componets(9 * tileWidth, 14 * tileHeight - 3, tileWidth, 6, "black"));
+        
+        for (let i=0; i < walls.length; i++) {
+            walls[i].draw();
+            
+        }
+        
+        //vazw arithmous
+        ctx.font = "40px Georgia";
+        ctx.fillText("2", 3.35 * tileWidth, 2.7 * tileHeight);
+        ctx.fillText("1", 12.35 * tileWidth, 1.7 * tileHeight);
+        ctx.fillText("3", 5.35 * tileWidth, 3.7 * tileHeight);
+        ctx.fillText("4", 9.35 * tileWidth, 3.7 * tileHeight);
+        ctx.fillText("5", 2.35 * tileWidth, 4.7 * tileHeight);
+        ctx.fillText("6", 14.35 * tileWidth, 4.7 * tileHeight);
+        ctx.fillText("7", 4.35 * tileWidth, 5.7 * tileHeight);
+        ctx.fillText("8", 10.35 * tileWidth, 5.7 * tileHeight);
+        ctx.fillText("9", 3.35 * tileWidth, 9.7 * tileHeight);
+        ctx.fillText("10", 8.2 * tileWidth, 10.7 * tileHeight);
+        ctx.fillText("11", 13.2 * tileWidth, 10.7 * tileHeight);
+        ctx.fillText("12", 1.2 * tileWidth, 11.7 * tileHeight);
+        ctx.fillText("13", 10.2 * tileWidth, 11.7 * tileHeight);
+        ctx.fillText("14", 6.2 * tileWidth, 12.7 * tileHeight);
+        ctx.fillText("15", 14.2 * tileWidth, 12.7 * tileHeight);
+        ctx.fillText("16", 2.2 * tileWidth, 14.7 * tileHeight);
+        ctx.fillText("17", 9.2 * tileWidth, 14.7 * tileHeight);
+
+
+    </script>
+</body>
+</html>

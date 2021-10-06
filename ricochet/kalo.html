@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        canvas {
+            float: left;
+            border: 1px solid black;
+        }
+
+        .right {
+            padding-top: 20%;
+            font: 200% Georgia;
+        }
+    </style>
+    <title>ricochet robots</title>
+</head>
+
+<body>
+    <div id="Page1">
+        <div class="row" style="margin-top:10%;">
+            <span>RED</span>: X
+            <span><input type="number" id="redX" min="1" max="16" /></span> Y
+            <span><input type="number" id="redY" min="1" max="16" /></span>
+
+        </div>
+        <div class="row">
+            <span>GREEN</span>: X
+            <span><input type="number" id="greenX" min="1" max="16" /></span> Y
+            <span><input type="number" id="greenY" min="1" max="16" /></span>
+
+        </div>
+        <div class="row">
+            <span>YELLOW</span>: X
+            <span><input type="number" id="yellowX" min="1" max="16" /></span> Y
+            <span><input type="number" id="yellowY" min="1" max="16" /></span>
+
+        </div>
+        <div class="row">
+            <span>BLUE</span>: X
+            <span><input type="number" id="blueX" min="1" max="16" /></span> Y
+            <span><input type="number" id="blueY" min="1" max="16" /></span>
+
+        </div>
+
+        <div class="row">
+            <button onclick="choosePage(this); takeStartingPositions();" id="showPage2">READY</button>
+        </div>
+    </div>
+
+    <div id="Page2" style="display:none">
+        <canvas id="gameScreen" width="1200" height="900" onclick="takeCoords(event)"></canvas>
+        <div class="right">
+            <span>CHOSEN ROBOT :</span>
+            <span id="movingRobot_div"> RED</span>
+            <div>
+            <span>COUNT : </span>
+            <span id="count_span"> 0</span></div>
+        </div>
+    </div>
+
+    <script src="componets.js"></script>
+    <script src="main.js"></script>
+    <script src="input Handler.js"></script>
+    
+    <script>
+        
+        //------------------------------------FOR CHANGING PAGES------------------------------
+        var page1 = document.getElementById("Page1");
+        var page2 = document.getElementById("Page2");
+        
+        function choosePage(el) {
+           // if(redX > 0 && redX < 16 && redY > 0 && redY < 16 &&
+           //    blueX > 0 && blueX < 16 && blueY > 0 && blueY < 16 &&
+             //  yellowX > 0 && yellowX < 16 && yellowY > 0 && yellowY < 16&&
+               // greenX > 0 && greenX < 16 && greenY > 0 && greenY < 16){
+                page1.style.top = 200 + "%";
+                page1.style.display = "none";
+                page2.style.top = 200 + "%";
+                page2.style.display = "none";
+            
+                if (el.id === "showPage2") {
+                    page2.style.top = 0 + "%";
+                    page2.style.display = "block";
+                }
+            //}else alert("OLOI OI ARITHMOI THA PREPEI NA EINAI APO 1 EWS 15");
+        }
+
+        function takeStartingPositions() {
+            
+            redX = document.getElementById("redX").value;
+            redY = document.getElementById("redY").value;
+            blueX = document.getElementById("blueX").value;
+            blueY = document.getElementById("blueY").value;
+            greenX = document.getElementById("greenX").value;
+            greenY = document.getElementById("greenY").value;
+            yellowX = document.getElementById("yellowX").value;
+            yellowY = document.getElementById("yellowY").value;
+            
+
+           redPlayer = new componets((redX - 1) * tileWidth + 0.1 * tileWidth, (redY - 1) * tileHeight + 0.1 * tileHeight, tileWidth * 0.8, 0.8 * tileHeight, "red");
+            
+           bluePlayer = new componets((blueX - 1) * tileWidth + 0.1 * tileWidth, (blueY - 1) * tileHeight + 0.1 * tileHeight, tileWidth * 0.8, 0.8 * tileHeight, "blue");
+
+           yellowPlayer = new componets((yellowX - 1) * tileWidth + 0.1 * tileWidth, (yellowY - 1) * tileHeight + 0.1 * tileHeight, tileWidth * 0.8, 0.8 * tileHeight, "yellow");
+
+           greenPlayer = new componets((greenX - 1) * tileWidth + 0.1 * tileWidth, (greenY - 1) * tileHeight + 0.1 * tileHeight, tileWidth * 0.8, 0.8 * tileHeight, "green");
+
+            GameLoop();
+        }
+        var playerMoving = "red";
+        function takeCoords(event) {
+            if (event.clientX > yellowPlayer.position.x &&
+                event.clientX < yellowPlayer.position.x + yellowPlayer.size.width &&
+                event.clientY > yellowPlayer.position.y &&
+                event.clientY < yellowPlayer.position.y + yellowPlayer.size.height) {
+                playerMoving = "yellow";
+                document.getElementById("movingRobot_div").innerHTML = "YELLOW";
+            } else if (event.clientX > greenPlayer.position.x &&
+                event.clientX < greenPlayer.position.x + greenPlayer.size.width &&
+                event.clientY > greenPlayer.position.y &&
+                event.clientY < greenPlayer.position.y + greenPlayer.size.height) {
+                playerMoving = "green";
+                document.getElementById("movingRobot_div").innerHTML = "GREEN";
+            } else if (event.clientX > bluePlayer.position.x &&
+                event.clientX < bluePlayer.position.x + bluePlayer.size.width &&
+                event.clientY > bluePlayer.position.y &&
+                event.clientY < bluePlayer.position.y + bluePlayer.size.height) {
+                playerMoving = "blue";
+                document.getElementById("movingRobot_div").innerHTML = "BLUE";
+            } else if (event.clientX > redPlayer.position.x &&
+                event.clientX < redPlayer.position.x + redPlayer.size.width &&
+                event.clientY > redPlayer.position.y &&
+                event.clientY < redPlayer.position.y + redPlayer.size.height) {
+                playerMoving = "red";
+                document.getElementById("movingRobot_div").innerHTML = "RED";
+            }
+        }
+    </script>
+</body>
+</html>
