@@ -49,3 +49,8 @@ p - shoot
 escape - pause
 
 https://giorgos-terzoglou.github.io/JavaScript-Games/ping%20poing/HtmlPage.html
+
+# Ricochet
+
+The ricochet robots board game
+
